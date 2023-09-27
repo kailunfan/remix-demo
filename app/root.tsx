@@ -5,8 +5,10 @@ import {
   Scripts,
   ScrollRestoration,
   Outlet,
+  useNavigation,
 } from "@remix-run/react";
-import { Layout, Menu } from "antd";
+import { Layout } from "antd";
+import Menu from "./components/menu";
 
 import type { LinksFunction } from "@remix-run/node";
 
@@ -19,6 +21,7 @@ export const links: LinksFunction = () => [
 ];
 
 export default function App() {
+  const navigation = useNavigation();
   return (
     <html lang="en">
       <head>
@@ -39,18 +42,14 @@ export default function App() {
               alignItems: "center",
             }}
           >
-            <div className="demo-logo" />
-            <Menu
-              theme="dark"
-              mode="horizontal"
-              defaultSelectedKeys={["2"]}
-              items={new Array(3).fill(null).map((_, index) => ({
-                key: String(index + 1),
-                label: `nav ${index + 1}`,
-              }))}
-            />
+            <Menu />
           </Header>
-          <Content className="site-layout" style={{ padding: "0 10px" }}>
+          <Content
+            className={`content ${
+              navigation.state === "loading" ? "loading" : ""
+            }`}
+            style={{ padding: "0 10px" }}
+          >
             <Outlet />
           </Content>{" "}
         </Layout>
