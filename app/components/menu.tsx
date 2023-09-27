@@ -14,6 +14,10 @@ export default function ProjectMenu() {
           <SettingOutlined />
           Contacts
         </NavLink>
+        <NavLink className="menu" to="/antd">
+          <SettingOutlined />
+          Antd
+        </NavLink>
       </div>
     </div>
   );
