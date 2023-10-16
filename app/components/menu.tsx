@@ -18,6 +18,10 @@ export default function ProjectMenu() {
           <SettingOutlined />
           Antd
         </NavLink>
+        <NavLink className="menu" to="/todo">
+          <SettingOutlined />
+          ToDo
+        </NavLink>
       </div>
     </div>
   );

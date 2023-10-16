@@ -48,7 +48,7 @@ export default function App() {
             className={`content ${
               navigation.state === "loading" ? "loading" : ""
             }`}
-            style={{ padding: "0 10px" }}
+            style={{ padding: "0 10px", height: "calc(100vh - 64px)" }}
           >
             <Outlet />
           </Content>{" "}
