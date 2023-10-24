@@ -1,45 +1,72 @@
-import { Card } from "antd";
+import { Card, Button, Input } from "antd";
 import React from "react";
 import TodoItem from "./TodoItem";
-import type { HeadersFunction, ActionFunctionArgs } from "@remix-run/node";
+import { type ActionFunctionArgs, json } from "@remix-run/node";
+import invariant from "tiny-invariant";
+
+import todoService from "~/service/todoService";
+import { useFetcher, useLoaderData } from "@remix-run/react";
+
+export const loader = async function name() {
+  return json({
+    todos: await todoService.todoList(),
+  });
+};
 
 export const action = async ({ params, request }: ActionFunctionArgs) => {
-  const formData = await request.formData();
-  console.log(request.headers.get("X-Stretchy-Pants"));
-  console.log(formData);
+  const d = Object.fromEntries(await request.formData());
+  const op = d.op as keyof typeof actionMap;
+  await actionMap[op](d);
   return null;
 };
 
-export const headers: HeadersFunction = ({
-  actionHeaders,
-  loaderHeaders,
-  parentHeaders,
-  errorHeaders,
-}) => ({
-  "X-Stretchy-Pants": "its for fun",
-  "Cache-Control": "max-age=300, s-maxage=3600",
-});
+const actionMap = {
+  setState: async function (f: any) {
+    await todoService.setState(parseInt(f.id as string), f.state ? 1 : 0);
+  },
+  add: async function (f: any) {
+    invariant(f.name, "name can not be empty");
+    await todoService.addTodo(f.name);
+  },
+};
+
+const Creator = function () {
+  const fetcher = useFetcher();
+  // const submit = useSubmit();
+  return (
+    <fetcher.Form method="post">
+      <div style={{ display: "flex" }}>
+        <Input name="name" defaultValue="" />
+        <Button type="primary" htmlType="submit">
+          Submit
+        </Button>
+        <input name="op" value="add" type="hidden"></input>
+      </div>
+    </fetcher.Form>
+  );
+};
 
 const App: React.FC = () => {
-  const data = [
-    "Racing car sprays burning fuel into crowd.",
-    "Japanese princess to wed commoner.",
-    "Australian walks 100km after outback crash.",
-    "Man charged over missing wedding girl.",
-    "Los Angeles battles huge wildfires.",
-  ];
+  const { todos } = useLoaderData<typeof loader>();
 
   return (
-    <Card
-      size="small"
-      title="ToDos"
-      extra={<a href="#">More</a>}
-      style={{ width: 600, margin: "2em auto" }}
-    >
-      {data.map((x) => (
-        <TodoItem key={x} title={x}></TodoItem>
-      ))}
-    </Card>
+    <div>
+      <Card
+        size="small"
+        title="ToDos"
+        style={{ width: 600, margin: "2em auto" }}
+        extra={<Creator />}
+      >
+        {todos.map((x) => (
+          <TodoItem
+            key={x.id}
+            title={x.name}
+            id={x.id}
+            state={x.state}
+          ></TodoItem>
+        ))}
+      </Card>
+    </div>
   );
 };
 
